@@ -12,5 +12,7 @@
       "@components/*": ["src/components/*"],
       "@services/*": ["/src/services/*"]
     }
-  }
+  },
+  "include": ["next-env.d.ts", "twin.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

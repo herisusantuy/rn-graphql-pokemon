@@ -1,13 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { ScreenProps } from '../../navigations/root-stack';
 import { useQuery } from '@apollo/client';
 import _ from 'lodash';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { GET_POKEMONS } from 'src/graphql/queries';
-import { Loading } from '@components/molecules';
+import { Loading, PokemonCard } from '@components/molecules';
+import { AppStackParamList } from '@navigations/bottom-tab';
 
 const HomeScreen: ScreenProps<'Home'> = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { loading, error, data } = useQuery(GET_POKEMONS);
 
   if (loading) {
@@ -16,33 +21,37 @@ const HomeScreen: ScreenProps<'Home'> = () => {
     </View>;
   }
   if (error) return <Text>Error:{error.message}</Text>;
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {data?.pokemons?.results.map((pokemon, index) => (
-        <View key={index}>
-          <Image
-            source={{ uri: pokemon?.image }}
-            style={{
-              width: 150,
-              height: 150,
-              borderRadius: 10,
-              backgroundColor: '#F2F2F2'
-            }}
-            resizeMode='cover'
-          />
-          <Text>{_.startCase(pokemon?.name)}</Text>
-        </View>
-      ))}
+      <View style={styles.wrapper}>
+        {data?.pokemons?.results.map(pokemon => {
+          return (
+            <PokemonCard
+              key={pokemon.id}
+              name={pokemon?.name}
+              uri={pokemon?.artwork}
+              onPressButton={() =>
+                navigation.navigate('Pokemon', { name: pokemon?.name })
+              }
+            />
+          );
+        })}
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white'
+  },
+  wrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    padding: 5
   }
 });
 

@@ -9,9 +9,12 @@ export const GET_POKEMONS = gql`
       status
       message
       results {
+        id
         url
         name
         image
+        artwork
+        dreamworld
       }
     }
   }
