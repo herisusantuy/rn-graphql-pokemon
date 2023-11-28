@@ -16,6 +16,8 @@
     "@react-navigation/native-stack": "^6.9.16",
     "@reduxjs/toolkit": "^1.9.7",
     "@supabase/supabase-js": "^2.38.4",
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.1.2",
     "@types/lodash": "^4.14.202",
     "axios": "^1.5.1",
     "expo": "^49.0.0",

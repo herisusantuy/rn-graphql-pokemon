@@ -1,34 +1,62 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { ScreenProps } from '../../navigations/root-stack';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator
+} from 'react-native';
+import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { useQuery } from '@apollo/client';
 import _ from 'lodash';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { GET_POKEMONS } from 'src/graphql/queries';
+import { ScreenProps } from '@navigations/root-stack';
 import { Loading, PokemonCard } from '@components/molecules';
 import { AppStackParamList } from '@navigations/bottom-tab';
 
 const HomeScreen: ScreenProps<'Home'> = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<AppStackParamList>>();
-  const { loading, error, data } = useQuery(GET_POKEMONS);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [limit, setLimit] = useState<number>(10);
+  const { loading, error, data, refetch } = useQuery(GET_POKEMONS, {
+    variables: {
+      limit
+    }
+  });
 
-  if (loading) {
-    <View style={styles.container}>
-      <Loading visible={loading} />
-    </View>;
-  }
   if (error) return <Text>Error:{error.message}</Text>;
 
+  const handleMomentumScrollEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ) => {
+    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+    const isCloseToBottom =
+      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+
+    if (isCloseToBottom) {
+      setLimit(prev => prev + 10);
+      refetch({
+        limit: limit
+      });
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      ref={scrollViewRef}
+      contentContainerStyle={styles.container}
+      onMomentumScrollEnd={handleMomentumScrollEnd}
+    >
       <View style={styles.wrapper}>
         {data?.pokemons?.results.map(pokemon => {
           return (
             <PokemonCard
               key={pokemon.id}
+              id={pokemon?.id}
               name={pokemon?.name}
               uri={pokemon?.artwork}
               onPressButton={() =>
@@ -37,6 +65,19 @@ const HomeScreen: ScreenProps<'Home'> = () => {
             />
           );
         })}
+        {loading && (
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'absolute',
+              padding: 20
+            }}
+          >
+            <ActivityIndicator size='large' />
+            <Text>Loading...</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

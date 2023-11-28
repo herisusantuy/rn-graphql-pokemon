@@ -18,6 +18,7 @@ export type AppStackParamList = {
 const Tab = createBottomTabNavigator<AppStackParamList>();
 
 const StackNavigator = createNativeStackNavigator();
+
 const BottomStackNavigator = () => {
   return (
     <StackNavigator.Navigator
@@ -41,7 +42,11 @@ const BottomStackNavigator = () => {
 
 const AppStackNavigator = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: true
+      }}
+    >
       <Tab.Screen
         name='Home'
         component={BottomStackNavigator}
